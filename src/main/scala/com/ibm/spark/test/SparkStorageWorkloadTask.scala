@@ -31,7 +31,5 @@ class SparkStorageWorkloadTask (name: String = "Storage Work") extends SparkWork
     val numwords = wordsRDD.count()
 
     println(s"total wl: $totalWordLength, word count:$numwords")
-
-    StdIn.readLine()
   }
 }

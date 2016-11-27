@@ -26,8 +26,6 @@ class SparkSQLWorkloadTask(name: String = "SQL Work") extends SparkWorkloadTask(
 
     peopleDF.createOrReplaceTempView("people")
 
-    peopleRDD.persist()
-
     // SQL statements can be run by using the sql methods provided by spark
     val teenagerNamesDF = spark.sql("SELECT name FROM people WHERE age BETWEEN 13 AND 19")
     teenagerNamesDF.show()

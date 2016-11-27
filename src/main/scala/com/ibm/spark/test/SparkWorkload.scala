@@ -29,13 +29,10 @@ object SparkWorkload {
    */
     val sc = new SparkContext(conf)
     val sparkWorkload = new SparkWorkload(sparkWorkloadConf, List(new SparkStreamingWorkloadTask(),
-      new SparkStorageWorkloadTask(),
-      new SparkSQLWorkloadTask()))
+      new SparkSQLWorkloadTask(), new SparkStorageWorkloadTask()))
 
     getWorkloadRunner(sparkWorkload, conf, sc).run()
 
-    println("End: ")
-    scala.io.StdIn.readLine()
     sc.stop()
   }
 
@@ -66,15 +63,26 @@ object SparkWorkload {
   def parseArgs(args: Array[String]): SparkWorkloadConf = {
     var iterations = 0
     var duration = 0L
+    var wait = false
 
-    for (i <- 0 to args.length - 2) {
+    var i = 0
 
+    while (i < args.length) {
       args(i) match {
-        case "--iterations" => iterations = args(i + 1).toInt
-        case "--duration" => duration = args(i + 1).toInt
+        case "--iterations" if (i + 1 < args.length) => {
+          iterations = args(i + 1).toInt
+          i += 1
+        }
+        case "--duration" if (i + 1 < args.length) => {
+          duration = args(i + 1).toInt
+          i += 1
+        }
+        case "--wait" => wait = true
+        case _ =>
       }
+      i += 1
     }
-    new SparkWorkloadConf(1, iterations, duration)
+    new SparkWorkloadConf(1, iterations, duration, wait)
   }
 }
 
@@ -84,7 +92,7 @@ class SparkWorkload(conf: SparkWorkloadConf, tasks: List[SparkWorkloadTask]) {
   def workLoadConf() = conf
 }
 
-case class SparkWorkloadConf(numApps: Int, iterations: Int, duration: Long)
+case class SparkWorkloadConf(numApps: Int, iterations: Int, duration: Long, waitAfterComplete: Boolean = false)
 
 class WorkloadThreadFactory extends ThreadFactory {
 

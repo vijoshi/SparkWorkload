@@ -48,11 +48,11 @@ class SparkStreamingWorkloadTask (name: String = "Streaming Work") extends Spark
     println ("stream wait start")
     ssc.awaitTerminationOrTimeout(5000)  // Wait for the computation to terminate
     println ("stream wait end")
-    StdIn.readLine()
+    //StdIn.readLine()
 
     enqueuer.interrupt()
     ssc.stop(false)
-    StdIn.readLine()
+    //StdIn.readLine()
   }
 
   class TextRDDStream (sc: SparkContext) {
@@ -74,7 +74,7 @@ class SparkStreamingWorkloadTask (name: String = "Streaming Work") extends Spark
 
     def next(): Unit = {
       queue.synchronized {
-        println ("**** enqueuing ****")
+        //println ("**** enqueuing ****")
         queue.enqueue(sc.makeRDD(data(random.nextInt(max)).split(" ")))
       }
     }

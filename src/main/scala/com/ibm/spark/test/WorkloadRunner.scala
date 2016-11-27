@@ -2,6 +2,8 @@ package com.ibm.spark.test
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import scala.io.StdIn
+
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -25,6 +27,12 @@ SparkContext) extends
 
   }
 
+  def afterEnd(): Unit = {
+    if (sparkWorkload.workLoadConf().waitAfterComplete) {
+      StdIn.readLine()
+    }
+  }
+
   def shouldStop(): Boolean
 
   override def run(): Unit = {
@@ -33,6 +41,7 @@ SparkContext) extends
       sparkWorkload.workLoadTasks().foreach(task => task.execute(sparkContext))
       stepExecuted()
     }
+    afterEnd()
   }
 }
 
