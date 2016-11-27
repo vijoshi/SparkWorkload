@@ -13,23 +13,26 @@ object SparkWorkload {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf()
-    val sparkWorkloadConf = new SparkWorkloadConf(1, 0, 2)
+    val sparkWorkloadConf = parseArgs(args)
 
- /*   val execService = Executors.newFixedThreadPool(sparkWorkloadConf.numApps, new
-        WorkloadThreadFactory())
+    /*   val execService = Executors.newFixedThreadPool(sparkWorkloadConf.numApps, new
+           WorkloadThreadFactory())
 
-    //execService.invokeAll()
+       //execService.invokeAll()
 
-   val r = for (i <- 1 to sparkWorkloadConf.numApps) yield {
-      val sparkWorkload = new SparkWorkload(sparkWorkloadConf, List(new SparkSQLWorkloadTask()))
-      getWorkloadRunner(sparkWorkloadConf, sparkWorkload, new SparkContext(conf))
-    }
+      val r = for (i <- 1 to sparkWorkloadConf.numApps) yield {
+         val sparkWorkload = new SparkWorkload(sparkWorkloadConf, List(new SparkSQLWorkloadTask()))
+         getWorkloadRunner(sparkWorkloadConf, sparkWorkload, new SparkContext(conf))
+       }
 
-    println(s"$r - ${r.getClass}")
-*/
+       println(s"$r - ${r.getClass}")
+   */
     val sc = new SparkContext(conf)
-    val sparkWorkload = new SparkWorkload(sparkWorkloadConf, List(new SparkSQLWorkloadTask()))
-    getWorkloadRunner(sparkWorkloadConf, sparkWorkload, sc).run()
+    val sparkWorkload = new SparkWorkload(sparkWorkloadConf, List(new SparkStreamingWorkloadTask(),
+      new SparkStorageWorkloadTask(),
+      new SparkSQLWorkloadTask()))
+
+    getWorkloadRunner(sparkWorkload, conf, sc).run()
 
     println("End: ")
     scala.io.StdIn.readLine()
@@ -45,22 +48,40 @@ object SparkWorkload {
     }
   } */
 
-  def getWorkloadRunner(conf: SparkWorkloadConf, sparkWorkload: SparkWorkload, sparkContext:
+  def getWorkloadRunner(sparkWorkload: SparkWorkload, sparkConf: SparkConf, sparkContext:
   SparkContext): WorkloadRunner = {
+
+    val conf = sparkWorkload.workLoadConf()
 
     if (conf.iterations > 0) {
       new IterationWorkloadRunner(sparkWorkload, sparkContext, conf.iterations)
-    } else if (conf.duration > 0) {
+    } else if (sparkWorkload.workLoadConf().duration > 0) {
       new DurationWorkloadRunner(sparkWorkload, sparkContext, conf.duration)
     } else {
       new IterationWorkloadRunner(sparkWorkload, sparkContext, 1)
     }
 
   }
+
+  def parseArgs(args: Array[String]): SparkWorkloadConf = {
+    var iterations = 0
+    var duration = 0L
+
+    for (i <- 0 to args.length - 2) {
+
+      args(i) match {
+        case "--iterations" => iterations = args(i + 1).toInt
+        case "--duration" => duration = args(i + 1).toInt
+      }
+    }
+    new SparkWorkloadConf(1, iterations, duration)
+  }
 }
 
 class SparkWorkload(conf: SparkWorkloadConf, tasks: List[SparkWorkloadTask]) {
   def workLoadTasks() = tasks
+
+  def workLoadConf() = conf
 }
 
 case class SparkWorkloadConf(numApps: Int, iterations: Int, duration: Long)

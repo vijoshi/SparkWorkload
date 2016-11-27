@@ -2,13 +2,14 @@ package com.ibm.spark.test
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
  * Created by vinayak on 24/11/16.
  */
 
-abstract class WorkloadRunner(sparkWorkload: SparkWorkload, sparkContext: SparkContext) extends
+abstract class WorkloadRunner(sparkWorkload: SparkWorkload, sparkContext:
+SparkContext) extends
   Runnable {
   val requestStop = new AtomicBoolean(false)
 
@@ -35,7 +36,8 @@ abstract class WorkloadRunner(sparkWorkload: SparkWorkload, sparkContext: SparkC
   }
 }
 
-class IterationWorkloadRunner(sparkWorkload: SparkWorkload, sparkContext: SparkContext,
+class IterationWorkloadRunner(sparkWorkload: SparkWorkload, sparkContext:
+SparkContext,
     iterations: Int) extends
   WorkloadRunner(sparkWorkload, sparkContext) {
 
@@ -50,7 +52,8 @@ class IterationWorkloadRunner(sparkWorkload: SparkWorkload, sparkContext: SparkC
   }
 }
 
-class DurationWorkloadRunner(sparkWorkload: SparkWorkload, sparkContext: SparkContext,
+class DurationWorkloadRunner(sparkWorkload: SparkWorkload, sparkContext:
+SparkContext,
     timeoutMillis: Long) extends
   WorkloadRunner(sparkWorkload, sparkContext) {
 
